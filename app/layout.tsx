@@ -3,6 +3,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import BackgroundFX from "@/components/BackgroundFX";
+import Cursor from "@/components/Cursor";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -23,6 +24,7 @@ export default function RootLayout({
       >
         <Navbar />
         <BackgroundFX /> {/* 🔥 yangi animatsion fon */}
+        <Cursor />
         <main>{children}</main>
       </body>
     </html>
