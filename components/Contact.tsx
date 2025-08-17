@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+// types kerak bo'lmaydi, lekin React tiplari ishlatamiz
 import InputMask from "react-input-mask";
 
 type FormState = {
@@ -9,6 +10,12 @@ type FormState = {
   phone: string;
   message: string;
 };
+
+// Mask render-prop uchun qulay tip
+type MaskInputProps = React.DetailedHTMLProps<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  HTMLInputElement
+>;
 
 export default function Contact() {
   const [loading, setLoading] = useState(false);
@@ -23,7 +30,6 @@ export default function Contact() {
 
   const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
   const cleanPhone = (v: string) => v.replace(/[^\d+]/g, "");
-  // +998(90/91/93/94/95/97/98/99/77/71-75/33/88) diapazonlari
   const isUzPhone = (v: string) => /^\+998(9[0-9]|7[1-5]|33|88)\d{7}$/.test(v);
 
   const onChange =
@@ -52,18 +58,22 @@ export default function Contact() {
         body: JSON.stringify({
           name: data.name.trim(),
           email: data.email.trim(),
-          phone, // tozalangan
+          phone,
           message: data.message.trim(),
         }),
       });
+
       if (!res.ok) {
-        const j = await res.json().catch(() => ({}));
+        const j = await res.json().catch(() => ({} as { error?: string }));
         throw new Error(j?.error || "Yuborishda xatolik yuz berdi.");
       }
+
       setOk("Xabar muvaffaqiyatli yuborildi!");
       setData({ name: "", email: "", phone: "", message: "" });
-    } catch (e: any) {
-      setErr(e.message || "Server xatosi.");
+    } catch (error) {
+      // ❌ any o'rniga xavfsiz tip-guard
+      if (error instanceof Error) setErr(error.message);
+      else setErr("Server xatosi.");
     } finally {
       setLoading(false);
     }
@@ -89,7 +99,6 @@ export default function Contact() {
         </div>
 
         <form onSubmit={onSubmit} className="mx-auto max-w-2xl space-y-6">
-          {/* Honeypot anti-bot */}
           <input
             type="text"
             name="company"
@@ -123,7 +132,6 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Telefon — professional mask */}
           <div>
             <label className="block text-sm text-white/60 mb-2">Telefon</label>
             <InputMask
@@ -132,7 +140,7 @@ export default function Contact() {
               value={data.phone}
               onChange={onChange("phone")}
             >
-              {(inputProps: any) => (
+              {(inputProps: MaskInputProps) => (
                 <input
                   {...inputProps}
                   type="tel"
