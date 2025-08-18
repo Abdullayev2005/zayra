@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 // types kerak bo'lmaydi, lekin React tiplari ishlatamiz
-import InputMask from "react-input-mask";
+import dynamic from "next/dynamic";
+const InputMask = dynamic(() => import("react-input-mask"), { ssr: false });
 
 type FormState = {
   name: string;
