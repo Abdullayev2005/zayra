@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import InputMask from "react-input-mask-next";
 
 type FormState = {
   name: string;
   email: string;
-  phone: string;
+  phone: string; // formatted (e.g. "+998 (90) 123-45-67")
   message: string;
 };
 
@@ -30,16 +29,46 @@ export default function Contact() {
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setData((p) => ({ ...p, [key]: e.target.value }));
 
+  // ---- Telefon formatlash (kutubxonasiz) ----
+  const formatUzPhone = (raw: string) => {
+    // faqat raqamlar
+    const digits = raw.replace(/\D/g, "");
+    // 998 prefiksni olib tashlab, faqat 9 ta lokal raqamni olamiz
+    const local = digits.replace(/^998/, "").slice(0, 9); // 9 digit: XX XXX XX XX
+
+    let f = "+998";
+    if (local.length > 0) {
+      f += " (" + local.slice(0, 2);
+      if (local.length >= 2) f += ")";
+    }
+    if (local.length > 2) f += " " + local.slice(2, 5);
+    if (local.length > 5) f += "-" + local.slice(5, 7);
+    if (local.length > 7) f += "-" + local.slice(7, 9);
+    return f;
+  };
+
+  const onPhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatUzPhone(e.target.value);
+    setData((p) => ({ ...p, phone: formatted }));
+  };
+
+  const onPhoneFocus = () => {
+    if (!data.phone) {
+      setData((p) => ({ ...p, phone: "+998 " }));
+    }
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setOk(null);
     setErr(null);
 
-    const phone = cleanPhone(data.phone);
+    const phone = cleanPhone(data.phone); // "+998901234567"
 
     if (!data.name.trim()) return setErr("Ism va familiya kiritilmadi.");
     if (!isEmail(data.email)) return setErr("Email manzili noto‘g‘ri.");
-    if (!isUzPhone(phone)) return setErr("Telefon raqam formati noto‘g‘ri.");
+    if (!isUzPhone("+" + phone))
+      return setErr("Telefon raqam formati noto‘g‘ri.");
     if (!data.message.trim())
       return setErr("Xabar bo‘sh bo‘lishi mumkin emas.");
 
@@ -51,7 +80,7 @@ export default function Contact() {
         body: JSON.stringify({
           name: data.name.trim(),
           email: data.email.trim(),
-          phone,
+          phone: "+" + phone, // serverga tozalangan formatda
           message: data.message.trim(),
         }),
       });
@@ -91,6 +120,7 @@ export default function Contact() {
         </div>
 
         <form onSubmit={onSubmit} className="mx-auto max-w-2xl space-y-6">
+          {/* Honeypot anti-bot */}
           <input
             type="text"
             name="company"
@@ -124,16 +154,17 @@ export default function Contact() {
             </div>
           </div>
 
+          {/* Telefon (kutubxonasiz mask) */}
           <div>
             <label className="block text-sm text-white/60 mb-2">Telefon</label>
-            <label className="block text-sm text-white/60 mb-2">Telefon</label>
-            <InputMask
-              mask="+998 (99) 999-99-99"
-              maskPlaceholder="_" // <-- maskChar emas, maskPlaceholder
-              value={data.phone}
-              onChange={onChange("phone")}
+            <input
+              type="tel"
+              inputMode="tel"
               placeholder="+998 (__) ___-__-__"
               className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-emerald-400 transition"
+              value={data.phone}
+              onChange={onPhoneChange}
+              onFocus={onPhoneFocus}
             />
             <p className="text-xs text-white/40 mt-2">
               Format: +998 (90) 123-45-67 — faqat O‘zbekiston raqamlari qabul
