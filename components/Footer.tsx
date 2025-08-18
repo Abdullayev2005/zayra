@@ -176,7 +176,7 @@ export default function Footer() {
                   href="tel:+998901234567"
                   className="hover:text-white transition"
                 >
-                  +998 (90) 123-45-67
+                  +998 (95) 034-00-34
                 </a>
               </li>
               <li className="text-white/60">Toshkent, O‘zbekiston</li>
