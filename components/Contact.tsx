@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-// types kerak bo'lmaydi, lekin React tiplari ishlatamiz
-import dynamic from "next/dynamic";
-const InputMask = dynamic(() => import("react-input-mask"), { ssr: false });
+import InputMask from "react-input-mask-next";
 
 type FormState = {
   name: string;
@@ -11,12 +9,6 @@ type FormState = {
   phone: string;
   message: string;
 };
-
-// Mask render-prop uchun qulay tip
-type MaskInputProps = React.DetailedHTMLProps<
-  React.InputHTMLAttributes<HTMLInputElement>,
-  HTMLInputElement
->;
 
 export default function Contact() {
   const [loading, setLoading] = useState(false);
@@ -72,7 +64,6 @@ export default function Contact() {
       setOk("Xabar muvaffaqiyatli yuborildi!");
       setData({ name: "", email: "", phone: "", message: "" });
     } catch (error) {
-      // ❌ any o'rniga xavfsiz tip-guard
       if (error instanceof Error) setErr(error.message);
       else setErr("Server xatosi.");
     } finally {
@@ -135,22 +126,15 @@ export default function Contact() {
 
           <div>
             <label className="block text-sm text-white/60 mb-2">Telefon</label>
+            <label className="block text-sm text-white/60 mb-2">Telefon</label>
             <InputMask
               mask="+998 (99) 999-99-99"
-              maskChar="_"
+              maskPlaceholder="_" // <-- maskChar emas, maskPlaceholder
               value={data.phone}
               onChange={onChange("phone")}
-            >
-              {(inputProps: MaskInputProps) => (
-                <input
-                  {...inputProps}
-                  type="tel"
-                  inputMode="tel"
-                  placeholder="+998 (__) ___-__-__"
-                  className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-emerald-400 transition"
-                />
-              )}
-            </InputMask>
+              placeholder="+998 (__) ___-__-__"
+              className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-emerald-400 transition"
+            />
             <p className="text-xs text-white/40 mt-2">
               Format: +998 (90) 123-45-67 — faqat O‘zbekiston raqamlari qabul
               qilinadi
